@@ -11,9 +11,9 @@ import CastPage from "./pages/CastPage";
 function App() {
   return (
     <Router>
-      <div className="App">
+      <div className="App flex flex-col min-h-screen bg-dark text-white">
         <Navbar />
-
+        
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<Search />} />
