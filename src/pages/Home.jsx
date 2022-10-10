@@ -1,10 +1,80 @@
-import React from "react";
 import HomeImg from "../assets/home.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Movie from "../components/Movie";
 import MovieSkeleton from "../components/MovieSkeleton";
+import MovieContext from "../context/MovieContext";
+import { useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 function Home() {
+  const [loading, setLoading] = useState(false);
+  const { reset, setSearchTerm, setMovies, setTotalPages } =
+    useContext(MovieContext);
+  const [popular, setPopular] = useState();
+  const [topRated, setTopRated] = useState();
+  const [searchText, setSearchText] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const navigate = useNavigate();
+  // const { reset: resetPopular } = useContext(PopularContext)
+  // const { reset: resetTopRated } = useContext(RatingContext)
+
+  useEffect(() => {
+    reset();
+    // resetPopular()
+    // resetTopRated()
+  }, []);
+
+  useEffect(() => {
+    async function getPopular() {
+      const { data } = await axios.get(
+        `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.REACT_APP_API_KEY}`
+      );
+      setPopular(data?.results);
+    }
+
+    async function getTopRated() {
+      const { data } = await axios.get(
+        `https://api.themoviedb.org/3/movie/top_rated?api_key=${process.env.REACT_APP_API_KEY}`
+      );
+      setTopRated(data?.results);
+    }
+
+    async function getInformation() {
+      setLoading(true);
+      await getPopular();
+      await getTopRated();
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
+
+    getInformation();
+  }, []);
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    if (searchText === "") {
+      return;
+    }
+
+    setSearchLoading(true);
+    setSearchTerm(searchText);
+
+    const { data } = await axios.get(
+      `https://api.themoviedb.org/3/search/movie?api_key=${process.env.REACT_APP_API_KEY}&include_adult=false&query=${searchText}&page=1`
+    );
+
+    setMovies(data?.results.map((movie, index) => ({ ...movie, index })));
+    setTotalPages(data?.total_pages);
+
+    setTimeout(() => {
+      setSearchLoading(false);
+      navigate("/search");
+    }, 500);
+  };
+
   return (
     <main>
       {/* header */}
@@ -18,18 +88,24 @@ function Home() {
               earth.
             </div>
 
-            <form className="flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-2 md:p-6 md:bg-darkest rounded mb-8">
+            <form
+              onSubmit={onSubmit}
+              className="flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-2 md:p-6 md:bg-darkest rounded mb-8"
+            >
               <input
                 type="text"
                 className="py-3 px-5 focus:outline-none rounded text-black flex-1"
                 placeholder="Search movies..."
-                // value={searchText}
-                // onChange={(e) => setSearchText(e.target.value)}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
               />
 
               <button className="bg-accent flex items-center justify-center rounded text-white px-8 py-3 md:w-28 h-12">
-                <i className="fa-solid fa-magnifying-glass text-xl"></i>
-                <i className="fa-solid fa-spinner text-2xl animate-spin"></i>
+                {!searchLoading ? (
+                  <i className="fa-solid fa-magnifying-glass text-xl"></i>
+                ) : (
+                  <i className="fa-solid fa-spinner text-2xl animate-spin"></i>
+                )}
               </button>
             </form>
           </div>
@@ -59,8 +135,13 @@ function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
-            <Movie />
-            <MovieSkeleton />
+            {!loading
+              ? popular
+                  ?.slice(0, 12)
+                  ?.map((movie) => <Movie movie={movie} key={movie?.id} />)
+              : new Array(12)
+                  .fill(0)
+                  .map((_, index) => <MovieSkeleton key={index} />)}
           </div>
 
           <Link
@@ -91,7 +172,15 @@ function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+            {!loading
+              ? topRated
+                  ?.slice(0, 12)
+                  ?.map((movie) => <Movie movie={movie} key={movie?.id} />)
+              : new Array(12)
+                  .fill(0)
+                  .map((_, index) => <MovieSkeleton key={index} />)}
+          </div>
 
           <Link
             to="/toprated"
