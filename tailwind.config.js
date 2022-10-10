@@ -7,6 +7,7 @@ module.exports = {
         dark: '#1C2431',
         darkest: '#0B1523',
         accent: '#10C4BB',
+        darker: '#181F2A'
       }
     },
   },

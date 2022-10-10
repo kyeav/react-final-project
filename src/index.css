@@ -111,3 +111,12 @@
 .menu__open {
     overflow-y: hidden;
 }
+
+/* home page */
+
+#header {
+    height: calc(100vh - 128px);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
