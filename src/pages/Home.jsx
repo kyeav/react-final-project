@@ -28,7 +28,8 @@ function Home() {
               />
 
               <button className="bg-accent flex items-center justify-center rounded text-white px-8 py-3 md:w-28 h-12">
-                <i></i>
+                <i className="fa-solid fa-magnifying-glass text-xl"></i>
+                <i className="fa-solid fa-spinner text-2xl animate-spin"></i>
               </button>
             </form>
           </div>
