@@ -5,14 +5,17 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { MovieProvider } from "./context/MovieContext";
 import { PopularProvider } from "./context/PopularContext";
+import { RatingProvider } from "./context/RatingContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
+<RatingProvider>
   <PopularProvider>
     <MovieProvider>
       <App />
     </MovieProvider>
   </PopularProvider>
+  </RatingProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

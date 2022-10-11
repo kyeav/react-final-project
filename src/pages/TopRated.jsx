@@ -1,9 +1,186 @@
-import React from 'react'
+import { useState, useContext, useEffect } from "react";
+import MovieContext from "../context/MovieContext";
+import RatingContext from "../context/RatingContext";
+import axios from "axios";
+import Movie from "../components/Movie";
+import MovieSkeleton from "../components/MovieSkeleton";
 
 function TopRated() {
+  const [seeMore, setSeeMore] = useState(false);
+  const { genres } = useContext(MovieContext);
+  const {
+    loading,
+    setLoading,
+    activeGenres,
+    setActiveGenres,
+    currentPage,
+    setMovies,
+    setTotalPages,
+    movies,
+  } = useContext(RatingContext);
+
+  useEffect(() => {
+    async function getMovies() {
+      setLoading(true);
+      setActiveGenres([]);
+      const { data } = await axios.get(
+        `https://api.themoviedb.org/3/movie/top_rated?api_key=${process.env.REACT_APP_API_KEY}&page=${currentPage}`
+      );
+      setMovies(data?.results.map((movie, index) => ({ ...movie, index })));
+      setTotalPages(500);
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    }
+    getMovies();
+  }, [currentPage]);
+
+  const movieHasActiveGenres = (movie) => {
+    if (activeGenres.length === 0) {
+      return true;
+    }
+    const movieGenreIDs = movie.genre_ids;
+    const activeGenreIDs = activeGenres.map((genre) => genre.id);
+    const commonGenreIDs = movieGenreIDs.filter((id) =>
+      activeGenreIDs.includes(id)
+    );
+    if (commonGenreIDs.length === activeGenreIDs.length) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   return (
-    <div>TopRated</div>
-  )
+    <div className="flex-1">
+      {/* title */}
+      <div className="container mx-auto max-w-7xl px-6 pt-12 flex flex-col md:flex-row gap-y-4 md:items-center justify-between">
+        <div className="flex flex-col">
+          <div className="h-1 w-24 bg-accent mb-3 hidden md:block"></div>
+          <h1 className="text-3xl md:text-4xl font-bold">Top Rated Movies</h1>
+        </div>
+      </div>
+
+      {/* genres */}
+      {movies.length > 0 && (
+        <div className="container mx-auto max-w-7xl p-6 pb-4">
+          <div className="hidden md:flex flex-wrap text-sm gap-y-2">
+            {genres
+              .filter((genre) => {
+                let genreInMovies = false;
+                for (let movie of movies) {
+                  for (let id of movie?.genre_ids) {
+                    if (id === genre.id) {
+                      genreInMovies = true;
+                      break;
+                    }
+                  }
+                }
+                return genreInMovies;
+              })
+              .map((genre) => (
+                <div
+                  key={genre.id}
+                  className={`px-4 py-1 rounded-full cursor-pointer mr-2
+                  ${
+                    activeGenres?.includes(genre)
+                      ? "bg-[#68ded7] text-black"
+                      : "bg-[#303a4f] hover:bg-[#3b465c] text-white"
+                  }`}
+                  onClick={() => {
+                    if (activeGenres?.includes(genre)) {
+                      setActiveGenres(
+                        activeGenres.filter((item) => item.id !== genre.id)
+                      );
+                    } else {
+                      setActiveGenres([...activeGenres, genre]);
+                    }
+                  }}
+                >
+                  {genre.name}
+                </div>
+              ))}
+          </div>
+
+          {/* */}
+          <div className="flex md:hidden flex-wrap text-sm gap-y-2">
+            {genres
+              .slice()
+              .slice(0, seeMore ? genres.length : 1)
+              .filter((genre) => {
+                let genreInMovies = false;
+                for (let movie of movies) {
+                  for (let id of movie?.genre_ids) {
+                    if (id === genre.id) {
+                      genreInMovies = true;
+                      break;
+                    }
+                  }
+                }
+                return genreInMovies;
+              })
+              .map((genre) => (
+                <div
+                  key={genre.id}
+                  className={`px-4 py-1 rounded-full cursor-pointer mr-2
+                  ${
+                    activeGenres?.includes(genre)
+                      ? "bg-[#68ded7] text-black"
+                      : "bg-[#303a4f] text-white"
+                  }`}
+                  onClick={() => {
+                    if (activeGenres?.includes(genre)) {
+                      setActiveGenres(
+                        activeGenres.filter((item) => item.id !== genre.id)
+                      );
+                    } else {
+                      setActiveGenres([...activeGenres, genre]);
+                    }
+                  }}
+                >
+                  {genre.name}
+                </div>
+              ))}
+
+            {/* see more and see less */}
+            {!seeMore ? (
+              <div
+                className="px-4 py-1 rounded-full cursor-pointer bg-[#303a4f] text-white"
+                onClick={() => setSeeMore(true)}
+              >
+                <span className="mr-2">See More</span>
+                <i className="fa-solid fa-chevron-down text-xs"></i>
+              </div>
+            ) : (
+              <div
+                className="px-4 py-1 rounded-full cursor-pointer bg-[#303a4f] text-white"
+                onClick={() => setSeeMore(false)}
+              >
+                <span className="mr-2">See Less</span>
+                <i className="fa-solid fa-chevron-up text-xs"></i>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* movies grid */}
+      <div className="container mx-auto max-w-7xl p-6 pb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+          {!loading
+            ? movies
+                .filter((movie) => movieHasActiveGenres(movie))
+                .map((movie) => <Movie movie={movie} key={movie.id} />)
+            : new Array(20)
+                .fill(0)
+                .map((_, index) => <MovieSkeleton key={index} />)}
+        </div>
+
+        {/* pagination */}
+        {/* <Pagination context={RatingContext} /> */}
+      </div>
+    </div>
+  );
 }
 
-export default TopRated
+export default TopRated;
