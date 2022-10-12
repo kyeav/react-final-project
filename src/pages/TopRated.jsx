@@ -4,6 +4,7 @@ import RatingContext from "../context/RatingContext";
 import axios from "axios";
 import Movie from "../components/Movie";
 import MovieSkeleton from "../components/MovieSkeleton";
+import Pagination from '../components/Pagination'
 
 function TopRated() {
   const [seeMore, setSeeMore] = useState(false);
@@ -177,7 +178,7 @@ function TopRated() {
         </div>
 
         {/* pagination */}
-        {/* <Pagination context={RatingContext} /> */}
+        <Pagination context={RatingContext} />
       </div>
     </div>
   );

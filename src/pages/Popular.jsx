@@ -4,7 +4,7 @@ import MovieContext from "../context/MovieContext";
 import PopularContext from "../context/PopularContext";
 import Movie from "../components/Movie";
 import MovieSkeleton from "../components/MovieSkeleton";
-// import Pagination from '../components/Pagination'
+import Pagination from '../components/Pagination'
 
 function Popular() {
   const [seeMore, setSeeMore] = useState(false);
@@ -179,7 +179,7 @@ function Popular() {
         </div>
 
         {/* pagination */}
-        {/* <Pagination context={PopularContext} /> */}
+        <Pagination context={PopularContext} />
       </div>
     </div>
   );
