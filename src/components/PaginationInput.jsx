@@ -49,6 +49,8 @@ function PaginationInput({ context }) {
           className="hidden pagination__input h-8 w-10 leading-8 px-1 text-center rounded focus:outline-none text-black"
           ref={inputRef}
           type="number"
+          min='1'
+          max='500'
           onChange={(e) => setNumber(+e.target.value)}
         />
       </form>
