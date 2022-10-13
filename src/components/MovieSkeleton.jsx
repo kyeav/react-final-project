@@ -1,5 +1,3 @@
-import React from "react";
-
 function MovieSkeleton() {
   return (
     <div className="flex flex-col space-y-6">

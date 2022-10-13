@@ -7,7 +7,6 @@ const MovieContext = createContext()
 export const MovieProvider = ({ children }) => {
     const [genres, setGenres] = useState([])
     const [searchTerm, setSearchTerm] = useState("")
-    
     const [movies, setMovies] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(0)
