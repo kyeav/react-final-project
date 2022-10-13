@@ -5,6 +5,8 @@ import MovieSkeleton from "../components/MovieSkeleton";
 import MovieContext from "../context/MovieContext";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import PopularContext from '../context/PopularContext'
+import RatingContext from '../context/RatingContext'
 
 function Home() {
   const [loading, setLoading] = useState(false);
@@ -15,13 +17,13 @@ function Home() {
   const [searchText, setSearchText] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const navigate = useNavigate();
-  // const { reset: resetPopular } = useContext(PopularContext)
-  // const { reset: resetTopRated } = useContext(RatingContext)
+  const { reset: resetPopular } = useContext(PopularContext)
+  const { reset: resetTopRated } = useContext(RatingContext)
 
   useEffect(() => {
     reset();
-    // resetPopular()
-    // resetTopRated()
+    resetPopular()
+    resetTopRated()
   }, []);
 
   useEffect(() => {

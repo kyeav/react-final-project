@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import axios from "axios";
 import MovieContext from "../context/MovieContext";
 import Movie from "../components/Movie";
@@ -17,10 +17,28 @@ function Search() {
     currentPage,
     setCurrentPage,
     setTotalPages,
+    searchTerm,
+    setSearchTerm,
   } = useContext(MovieContext);
   const [seeMore, setSeeMore] = useState(false);
-  const [searchText, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("Featured")
+  const [searchText, setSearchText] = useState("");
+  const [sortBy, setSortBy] = useState("Featured");
+  const dropdownRef = useRef();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    setSearchText(searchTerm);
+    const hideDropdownOnBlur = (e) => {
+      if (
+        !e?.target?.classList?.contains("dropdown") &&
+        !dropdownRef?.current?.contains(e.target)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("click", hideDropdownOnBlur);
+    return () => document.removeEventListener("click", hideDropdownOnBlur);
+  }, []);
 
   useEffect(() => {
     async function getMovies() {
@@ -90,7 +108,7 @@ function Search() {
               className="p-3 pr-0 md:px-5 focus:outline-none rounded-l text-sm text-black flex-1"
               placeholder="Search movies..."
               value={searchText}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchText(e.target.value)}
             />
             <button className="bg-accent flex items-center justify-center rounded-r text-whitee md:px-8 py-3 w-12 sm:w-20 h-12">
               {!loading ? (
@@ -103,30 +121,54 @@ function Search() {
 
           {/* dropdown */}
           <div className="relative">
-            <div className="dropdown h-10 px-4 w-48 bg-[#303a4f] hover:bg-[#3b465c] rounded-md cursor-pointer flex items-center justify-between text-sm">
-              <span className="leading-10">Featured</span>
-              <i className="fa-solid fa-chevron-down duration 200"></i>
+            <div
+              className="dropdown h-10 px-4 w-48 bg-[#303a4f] hover:bg-[#3b465c] rounded-md cursor-pointer flex items-center justify-between text-sm"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              ref={dropdownRef}
+            >
+              <span className="leading-10">{sortBy}</span>
+              <i
+                className={`fa-solid fa-chevron-down duration-200 ${
+                  dropdownOpen ? "rotate-180" : "rotate-0"
+                }`}
+              ></i>
             </div>
 
             {/* filters */}
-            <div className="absolute z-10 top-14 inset-x-0 w-48 rounded-md cursor-pointer overflow-hidden text-sm leading-10">
+            <div
+              className={`absolute z-10 top-14 inset-x-0 w-48 rounded-md cursor-pointer overflow-hidden text-sm leading-10 ${
+                dropdownOpen ? "block" : "hidden"
+              }`}
+            >
               {/* featured */}
-              <div className="bg-[#303a4f] hover:bg-[#3b465c] px-4 h-10">
+              <div
+                className="bg-[#303a4f] hover:bg-[#3b465c] px-4 h-10"
+                onClick={() => setSortBy("Featured")}
+              >
                 Featured
               </div>
 
               {/* newest */}
-              <div className="bg-[#303a4f] hover:bg-[#3b465c] px-4 h-10">
+              <div
+                className="bg-[#303a4f] hover:bg-[#3b465c] px-4 h-10"
+                onClick={() => setSortBy("Newest")}
+              >
                 Newest
               </div>
 
               {/* oldest */}
-              <div className="bg-[#303a4f] hover:bg-[#3b465c] px-4 h-10">
+              <div
+                className="bg-[#303a4f] hover:bg-[#3b465c] px-4 h-10"
+                onClick={() => setSortBy("Oldest")}
+              >
                 Oldest
               </div>
 
               {/* rating */}
-              <div className="bg-[#303a4f] hover:bg-[#3b465c] px-4 h-10">
+              <div
+                className="bg-[#303a4f] hover:bg-[#3b465c] px-4 h-10"
+                onClick={() => setSortBy("Rating")}
+              >
                 Rating
               </div>
             </div>
@@ -241,18 +283,33 @@ function Search() {
       <div className="container mx-auto max-w-7xl p-6 pb-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
           {!loading
-            ? movies.sort((a, b) => {
-              if(sortBy === "Featured") return a?.index - b?.index
-              if(sortBy === "Newest") return Date.parse(b?.release_date) - Date.parse(a?.release_date)
-              if(sortBy === "Oldes") return Date.parse(a?.release_date) - Date.parse(b?.release_date) 
-              if(sortBy === "Rating") return b?.vote_average - a?.vote_average
-            })
-            .filter(movie => movieHasActiveGenres(movie))
-            .map((movie) => <Movie movie={movie} key={movie.id} />)
+            ? movies
+                .sort((a, b) => {
+                  if (sortBy === "Featured") return a?.index - b?.index;
+                  if (sortBy === "Newest")
+                    return (
+                      Date.parse(b?.release_date) - Date.parse(a?.release_date)
+                    );
+                  if (sortBy === "Oldest")
+                    return (
+                      Date.parse(a?.release_date) - Date.parse(b?.release_date)
+                    );
+                  if (sortBy === "Rating")
+                    return b?.vote_average - a?.vote_average;
+                })
+                .filter((movie) => movieHasActiveGenres(movie))
+                .map((movie) => <Movie movie={movie} key={movie.id} />)
             : new Array(20)
                 .fill(0)
                 .map((_, index) => <MovieSkeleton key={index} />)}
         </div>
+
+        {/* if no movies */}
+        {!loading && movies?.length === 0 && searchTerm && (
+          <div className="text-lg md:text-xl my-6">
+            There are no movies that matched your query.
+          </div>
+        )}
 
         {/* pagination */}
         <Pagination context={MovieContext} />
