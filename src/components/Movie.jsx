@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import MovieContext from "../context/MovieContext";
 import NoImage from "../assets/no_image.png";
 
 function Movie({ movie }) {
@@ -8,13 +7,11 @@ function Movie({ movie }) {
 
   useEffect(() => {
     const image = new Image();
-
     if (movie.poster_path) {
       image.src = `https://image.tmdb.org/t/p/original/${movie.poster_path}`;
     } else {
       image.src = NoImage;
     }
-
     image.onload = () => {
       setImg(image);
     };

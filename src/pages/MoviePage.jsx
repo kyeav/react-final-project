@@ -266,7 +266,7 @@ function MoviePage() {
           <div className="relative container max-w-7xl mx-auto px-6 py-12 md:py-20">
             <div className="h-1 w-24 bg-accent mb-3 hidden md:block"></div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-10">
-              Recommended Movies
+              You may also like
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
               {!loading
