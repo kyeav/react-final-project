@@ -11,5 +11,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("@tailwindcss/line-clamp", "@tailwindcss/aspect-ratio")],
+  plugins: [require("@tailwindcss/line-clamp")],
 };
